@@ -2,7 +2,7 @@
 
 MCP server cho phép Claude đọc và vẽ trên bản vẽ đang mở trong AutoCAD, thông qua giao diện COM (ActiveX) của Windows.
 
-Phiên bản 0.2.0 — RIKCO JSC.
+Phiên bản 0.2.1 — RIKCO JSC.
 
 > Tên repo và gói phát hành là **MCP_Cad_NghiaMax**. Bên trong vẫn giữ các tên kỹ thuật cũ để máy đã cài không phải đăng ký lại:
 > - gói Python `autocad_mcp`, lệnh `autocad-mcp.exe`;
@@ -38,7 +38,7 @@ Các tool ghi sẽ vẽ thẳng vào bản vẽ đang mở. Với bản vẽ g�
 py --version
 ```
 
-**Bước 2 — Giải nén và chạy script cài đặt.** Tải `MCP_Cad_NghiaMax-0.2.0-windows.zip` ở mục **Releases** của repo GitHub, giải nén vào một thư mục bất kỳ, mở PowerShell trong thư mục đó rồi chạy:
+**Bước 2 — Giải nén và chạy script cài đặt.** Tải `MCP_Cad_NghiaMax-0.2.1-windows.zip` ở mục **Releases** của repo GitHub, giải nén vào một thư mục bất kỳ, mở PowerShell trong thư mục đó rồi chạy:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install.ps1
@@ -114,7 +114,7 @@ Mở một bản vẽ trong AutoCAD rồi gõ cho Claude: *"Kiểm tra bản v�
 Trên một máy có Internet, cài **cùng phiên bản Python** với máy đích (ví dụ cùng 3.12 64-bit). Trong thư mục giải nén, chạy:
 
 ```powershell
-py -m pip download .\autocad_mcp-0.2.0-py3-none-any.whl -d wheelhouse
+py -m pip download .\autocad_mcp-0.2.1-py3-none-any.whl -d wheelhouse
 ```
 
 Chép cả thư mục (gồm `wheelhouse`) sang máy đích, rồi cài:
@@ -166,10 +166,21 @@ cd MCP_Cad_NghiaMax; py -m venv .venv; .\.venv\Scripts\python.exe -m pip install
 
 ### Script COM viết tay (`scripts/acadlib.py`)
 
-Dùng cho những việc mà tool MCP chưa làm được, ví dụ dựng layout, viewport hay vẽ hàng loạt. Chạy bằng Python trong `.venv`. Không cần đặt `PYTHONIOENCODING`, vì thư viện tự chuyển console sang UTF-8.
+Dùng cho những việc mà tool MCP chưa làm được, ví dụ dựng layout, viewport hay vẽ hàng loạt. Không cần đặt `PYTHONIOENCODING`, vì thư viện tự chuyển console sang UTF-8.
+
+Phải chạy bằng Python của môi trường đã cài gói, vì môi trường đó có sẵn `pywin32`:
+
+| Cách cài | Python dùng để chạy script | Thư mục `scripts\` |
+|---|---|---|
+| Từ zip bằng `install.ps1` | `%LOCALAPPDATA%\autocad-mcp\.venv\Scripts\python.exe`, hoặc `<InstallDir>\.venv\...` nếu đã đổi chỗ cài | trong thư mục giải nén zip |
+| Từ mã nguồn (`pip install -e .`) | `<repo>\.venv\Scripts\python.exe` | `<repo>\scripts` |
+
+```powershell
+& "$env:LOCALAPPDATA\autocad-mcp\.venv\Scripts\python.exe" my_script.py
+```
 
 ```python
-import sys; sys.path.insert(0, r"<repo>\scripts")  # <repo> = thư mục repo hoặc thư mục giải nén zip
+import sys; sys.path.insert(0, r"<thu-muc>\scripts")  # thư mục repo hoặc thư mục giải nén zip
 import acadlib as A
 app, doc = A.connect("ten-ban-ve.dwg")      # sai tên bản vẽ thì báo lỗi, không vẽ nhầm
 with A.undo_group(doc):                       # gõ U một lần là hoàn tác cả đợt

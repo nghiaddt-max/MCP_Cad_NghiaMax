@@ -43,7 +43,19 @@ $lines = Get-ChildItem $stage -File -Recurse | Where-Object { $_.Name -ne "SHA25
 
 $zip = Join-Path $dist "$name-$version-windows.zip"
 if (Test-Path $zip) { Remove-Item -Force $zip }
-Compress-Archive -Path (Join-Path $stage "*") -DestinationPath $zip
+# Khong dung Compress-Archive: ban PowerShell 5.1 ghi duong dan trong zip bang dau "\" (sai chuan zip,
+# unzip/macOS/Linux giai nen thanh file ten "scripts\acadlib.py"). Tu ghi entry voi dau "/".
+Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+$archive = [IO.Compression.ZipFile]::Open($zip, [IO.Compression.ZipArchiveMode]::Create)
+try {
+    foreach ($f in Get-ChildItem $stage -File -Recurse | Sort-Object FullName) {
+        $entry = $f.FullName.Substring($stage.Length + 1).Replace("\", "/")
+        [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+            $archive, $f.FullName, $entry, [IO.Compression.CompressionLevel]::Optimal)
+    }
+} finally {
+    $archive.Dispose()
+}
 $zipHash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
 [IO.File]::WriteAllText("$zip.sha256", "$zipHash  $(Split-Path $zip -Leaf)`n", (New-Object Text.UTF8Encoding $false))
 Write-Host "Da dong goi: $zip"

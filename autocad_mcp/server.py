@@ -19,7 +19,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 
 from . import __version__
 
-mcp = MCPServer("autocad")
+mcp = MCPServer("autocad", version=__version__)
 
 
 def acad_tool(fn):
