@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autocad-mcp"
+version = "0.2.0"
+description = "MCP server ket noi AutoCAD qua COM (ActiveX) - RIKCO"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=2.3,<3",       # MCPServer (FastMCP cu) cua mcp 2.x
+    "pywin32>=306",
+]
+classifiers = ["Operating System :: Microsoft :: Windows"]
+
+[project.scripts]
+autocad-mcp = "autocad_mcp.server:main"
+
+[tool.setuptools]
+packages = ["autocad_mcp"]
